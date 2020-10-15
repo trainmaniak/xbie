@@ -82,7 +82,7 @@ public:
         "  \"lightType\": \"w\",\n"
         "  \"pwm\": " + (pwm_ ? "true" : "false") + ",\n"
         "  \"on\": " + (on_ ? "true" : "false") + ", \n"
-        "  \"target_\": " + String(target_) + "\n"
+        "  \"target\": " + String(target_) + "\n"
         "}";
     }
 

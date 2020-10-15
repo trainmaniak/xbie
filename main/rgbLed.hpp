@@ -88,12 +88,9 @@ public:
     void serialize(String &result) override {
         result = "{\n"
         "  \"id\": \"" + String(id_) + "\",\n"
-        "  \"lightType\": \"w\",\n"
+        "  \"lightType\": \"rgb\",\n"
         "  \"pwm\": " + (pwm_ ? "true" : "false") + ",\n"
         "  \"on\": " + (on_ ? "true" : "false") + ", \n"
-        "  \"state_r\": " + String(state_[0]) + ",\n"
-        "  \"state_g\": " + String(state_[1]) + ",\n"
-        "  \"state_b\": " + String(state_[2]) + ",\n"
         "  \"target_r\": " + String(target_[0]) + ",\n"
         "  \"target_g\": " + String(target_[1]) + ",\n"
         "  \"target_b\": " + String(target_[2]) + "\n"
