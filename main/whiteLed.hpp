@@ -7,38 +7,38 @@
 class WhiteLed : public Led
 {
 private:
-    int pin;
-    int state = 255;
-    int target = 255;
+    int pin_;
+    int state_ = 255;
+    int target_ = 255;
 
 public:
     WhiteLed(ESP8266WebServer &server, int id, int pin)
-        : Led(server, id), pin(pin) {}
+        : Led(server, id), pin_(pin) {}
 
     void setTarget(int volume)
     {
-        this->target = volume;
+        target_ = volume;
     }
 
     void last()
     {
-        on = true;
+        on_ = true;
     }
 
     void full()
     {
-        on = true;
+        on_ = true;
         setTarget(255);
     }
 
     void off()
     {
-        on = false;
+        on_ = false;
     }
 
     void toggle()
     {
-        if (on)
+        if (on_)
             off();
         else
             last();
@@ -46,104 +46,96 @@ public:
 
     void update() override
     {
-        if (!on)
-        {
-            int change = 0 - this->state;
-            this->state += DIMMINGSPEED * ((change > 0) ? 1 : -1);
+        bool updateRequired = false;
+        int change = 0;
 
-            if (this->state * PWMMULTIPLIER == PWMRANGE)
-            {
-                digitalWrite(this->pin, HIGH);
-                return;
-            }
-            if (this->state == 0)
-            {
-                digitalWrite(this->pin, LOW);
-                return;
-            }
-
-            analogWrite(this->pin, this->state * PWMMULTIPLIER);
+        if (!on_ && state_ != 0) {
+            change = 0 - state_;
+            updateRequired = true;
         }
-        else if (on && this->target != this->state)
-        {
-            int change = this->target - this->state;
-            this->state += DIMMINGSPEED * ((change > 0) ? 1 : -1);
+        else if (on_ && target_ != state_) {
+            change = target_ - state_;
+            updateRequired = true;
+        }
 
-            if (this->state * PWMMULTIPLIER == PWMRANGE)
+        if (updateRequired) {
+            state_ += DIMMINGSPEED * ((change > 0) ? 1 : -1);
+
+            if (state_ * PWMMULTIPLIER == PWMRANGE)
             {
-                digitalWrite(this->pin, HIGH);
+                digitalWrite(pin_, HIGH);
                 return;
             }
-            if (this->state == 0)
+            if (state_ == 0)
             {
-                digitalWrite(this->pin, LOW);
+                digitalWrite(pin_, LOW);
                 return;
             }
 
-            analogWrite(this->pin, this->state * PWMMULTIPLIER);
+            analogWrite(pin_, state_ * PWMMULTIPLIER);
         }
     }
 
     void serialize(String &result) override {
         result = "{\n"
-        "  \"id\": \"" + String(this->id) + "\",\n"
+        "  \"id\": \"" + String(id_) + "\",\n"
         "  \"lightType\": \"w\",\n"
-        "  \"pwm\": " + (this->pwm ? "true" : "false") + ",\n"
-        "  \"on\": " + (on ? "true" : "false") + ", \n"
-        "  \"target\": " + String(this->target) + "\n"
+        "  \"pwm\": " + (pwm_ ? "true" : "false") + ",\n"
+        "  \"on\": " + (on_ ? "true" : "false") + ", \n"
+        "  \"target_\": " + String(target_) + "\n"
         "}";
     }
 
     void registerEndpoints() override
     {
-        server.on("/light/" + String(this->id) + "/last", [this]() {
-            this->last();
-            server.sendHeader("Access-Control-Allow-Origin", "*");
-            server.send(200, "text/plain", "ok");
+        server_.on("/light/" + String(id_) + "/last", [this]() {
+            last();
+            server_.sendHeader("Access-Control-Allow-Origin", "*");
+            server_.send(200, "text/plain", "ok");
         });
 
-        server.on("/light/" + String(this->id) + "/full", [this]() {
-            this->full();
-            server.sendHeader("Access-Control-Allow-Origin", "*");
-            server.send(200, "text/plain", "ok");
+        server_.on("/light/" + String(id_) + "/full", [this]() {
+            full();
+            server_.sendHeader("Access-Control-Allow-Origin", "*");
+            server_.send(200, "text/plain", "ok");
         });
 
-        server.on("/light/" + String(this->id) + "/off", [this]() {
-            this->off();
-            server.sendHeader("Access-Control-Allow-Origin", "*");
-            server.send(201, "text/plain", "ok");
+        server_.on("/light/" + String(id_) + "/off", [this]() {
+            off();
+            server_.sendHeader("Access-Control-Allow-Origin", "*");
+            server_.send(201, "text/plain", "ok");
         });
 
-        server.on("/light/" + String(this->id) + "/toggle", [this]() {
-            this->toggle();
-            server.sendHeader("Access-Control-Allow-Origin", "*");
-            server.send(200, "text/plain", "ok");
+        server_.on("/light/" + String(id_) + "/toggle", [this]() {
+            toggle();
+            server_.sendHeader("Access-Control-Allow-Origin", "*");
+            server_.send(200, "text/plain", "ok");
         });
 
-        server.on("/light/" + String(this->id) + "/set/w", [this]() {
-            if (not server.hasArg("vol"))
+        server_.on("/light/" + String(id_) + "/set/w", [this]() {
+            if (not server_.hasArg("vol"))
             {
-                server.send(400, "text/plain", "missing argument");
+                server_.send(400, "text/plain", "missing argument");
                 return;
             }
 
-            int volume = Tools::stringToInt(server.arg("vol"));
+            int volume = Tools::stringToInt(server_.arg("vol"));
             if (volume > 255)
             {
-                server.send(400, "text/plain", "invalid request");
+                server_.send(400, "text/plain", "invalid request");
                 return;
             };
 
-            this->setTarget(volume);
-            server.sendHeader("Access-Control-Allow-Origin", "*");
-            server.send(200, "text/plain", "ok");
+            setTarget(volume);
+            server_.sendHeader("Access-Control-Allow-Origin", "*");
+            server_.send(200, "text/plain", "ok");
         });
 
-        server.on("/light/" + String(this->id) + "/status", [this]() {
-            server.sendHeader("Access-Control-Allow-Origin", "*");
+        server_.on("/light/" + String(id_) + "/status", [this]() {
+            server_.sendHeader("Access-Control-Allow-Origin", "*");
             String result;
             serialize(result);
-            server.send(200, "text/json", result);
+            server_.send(200, "text/json", result);
         });
     };
 };

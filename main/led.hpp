@@ -9,7 +9,7 @@
 class Led : public Light
 {
 protected:
-    bool pwm = true;
+    bool pwm_ = true;
 
 public:
     Led(ESP8266WebServer &server, int id)

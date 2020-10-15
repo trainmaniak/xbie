@@ -21,12 +21,16 @@ public:
         
     }
 
-    void addWLed(int pin) {
+    void addWLed(const int pin) {
         lightList.emplace_back(new WhiteLed(server, lightList.size(), pin));
     }
 
     void addRGBLed(const int *pinList) {
         lightList.emplace_back(new RGBLed(server, lightList.size(), pinList));
+    }
+
+    void addRGBStrip(const int pin, const int pixelCount) {
+        lightList.emplace_back(new RGBStrip(server, lightList.size(), pin, pixelCount));
     }
 
     void setEndpoints() {
@@ -49,7 +53,7 @@ public:
             server.sendHeader("Access-Control-Allow-Origin", "*");
 
             String result = "{\n"
-            "  \"uptime\": \"" + String(millis() / 1000) + ",\n"
+            "  \"uptime\": " + String(millis() / 1000) + ",\n"
             "  \"lights\": [";
             for (int i = 0; i < lightList.size(); ++i) {
                 String ledSer;

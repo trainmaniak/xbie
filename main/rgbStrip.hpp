@@ -7,13 +7,13 @@
 #include "light.hpp"
 #include "rgbStripAnimationEnum.hpp"
 
-class RGBStrip : Light
+class RGBStrip : public Light
 {
 private:
     Adafruit_NeoPixel *strip;
-    int pin;
-    int pixelCount = 0;
-    int target[3] = {255};
+    int pin_;
+    int pixelCount_ = 0;
+    int target_[3] = {255};
 
     RGBStripAnimationEnum animation_ = RGBStripAnimationEnum::solid;
     bool solidAnimationUpdated_ = false;
@@ -28,15 +28,15 @@ private:
     }
 
 public:
-    RGBStrip(ESP8266WebServer &server, int id)
-        : Light(server, id)
+    RGBStrip(ESP8266WebServer &server, int id, int pin, int pixelCount)
+        : Light(server, id), pin_(pin), pixelCount_(pixelCount)
     {
-        strip = new Adafruit_NeoPixel(pixelCount, pin, NEO_GRB + NEO_KHZ800);
+        strip = new Adafruit_NeoPixel(pixelCount_, pin_, NEO_GRB + NEO_KHZ800);
     }
 
     void setSolidColor(const int targetList[])
     {
-        memcpy(this->target, targetList, sizeof(this->target));
+        memcpy(target_, targetList, sizeof(target_));
         animation_ = RGBStripAnimationEnum::solid;
         solidAnimationUpdated_ = false;
     }
@@ -50,9 +50,9 @@ public:
                 return;
             else
             {
-                for (int i = 0; i < pixelCount; ++i)
+                for (int i = 0; i < pixelCount_; ++i)
                 {
-                    strip->setPixelColor(pixelCount, target[0], target[1], target[2]);
+                    strip->setPixelColor(pixelCount_, target_[0], target_[1], target_[2]);
                 }
 
                 solidAnimationUpdated_ = true;
@@ -67,13 +67,13 @@ public:
 
     void serialize(String &result) override {
         result = "{\n"
-        "  \"id\": \"" + String(this->id) + "\",\n"
+        "  \"id\": \"" + String(id_) + "\",\n"
         "  \"lightType\": \"s\",\n"
-        "  \"on\": " + (this->on ? "true" : "false") + ", \n"
+        "  \"on\": " + (on_ ? "true" : "false") + ", \n"
         "  \'animation\": " + getStringEnum() + ",\n"
-        "  \"target_r\": " + String(this->target[0]) + ",\n"
-        "  \"target_g\": " + String(this->target[1]) + ",\n"
-        "  \"target_b\": " + String(this->target[2]) + "\n"
+        "  \"target_r\": " + String(target_[0]) + ",\n"
+        "  \"target_g\": " + String(target_[1]) + ",\n"
+        "  \"target_b\": " + String(target_[2]) + "\n"
         "}";
     }
 

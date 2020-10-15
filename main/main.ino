@@ -25,7 +25,11 @@ const char *password = "";
 
 // I/O pins
 #define BLINK_LED 14 // On board led. Second instaled LED beside LED_BUILTIN.
-#define POWER_OUT_1 D3
+#define POWER_OUT_W D3
+#define POWER_OUT_RGB_R D4
+#define POWER_OUT_RGB_G D5
+#define POWER_OUT_RGB_B D6
+#define POWER_OUT_S D7
 
 // Web server
 ESP8266WebServer server(80);
@@ -41,8 +45,18 @@ void setup()
 {
     // IO INIT
     pinMode(BLINK_LED, OUTPUT);
-    pinMode(POWER_OUT_1, OUTPUT);
-    digitalWrite(POWER_OUT_1, LOW);
+
+    pinMode(POWER_OUT_W, OUTPUT);
+    digitalWrite(POWER_OUT_W, LOW);
+
+    pinMode(POWER_OUT_RGB_R, OUTPUT);
+    digitalWrite(POWER_OUT_RGB_R, LOW);
+
+    pinMode(POWER_OUT_RGB_G, OUTPUT);
+    digitalWrite(POWER_OUT_RGB_G, LOW);
+
+    pinMode(POWER_OUT_RGB_B, OUTPUT);
+    digitalWrite(POWER_OUT_RGB_B, LOW);
 
 // NEOPIXELS
 #if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
@@ -98,7 +112,10 @@ void setup()
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
 
-    xbie.addWLed(POWER_OUT_1);
+    xbie.addWLed(POWER_OUT_W);
+    int rgbPins[3] = {POWER_OUT_RGB_R, POWER_OUT_RGB_G, POWER_OUT_RGB_B};
+    xbie.addRGBLed(rgbPins);
+    //xbie.addRGBStrip(POWER_OUT_S, 150);
     xbie.setEndpoints();
 
     lastUpdate = millis();
