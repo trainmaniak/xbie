@@ -12,7 +12,7 @@ class XBie
 {
 private:
     ESP8266WebServer &server;
-    std::vector<std::unique_ptr<Led>> ledList;
+    std::vector<std::unique_ptr<Light>> lightList;
 
 public:
     XBie(ESP8266WebServer &server)
@@ -22,23 +22,23 @@ public:
     }
 
     void addWLed(int pin) {
-        ledList.emplace_back(new WhiteLed(server, ledList.size(), pin));
+        lightList.emplace_back(new WhiteLed(server, lightList.size(), pin));
     }
 
     void addRGBLed(const int *pinList) {
-        ledList.emplace_back(new RGBLed(server, ledList.size(), pinList));
+        lightList.emplace_back(new RGBLed(server, lightList.size(), pinList));
     }
 
     void setEndpoints() {
         this->registerEndpoints();
 
-        for (const std::unique_ptr<Led> &led : ledList) {
+        for (const std::unique_ptr<Light> &led : lightList) {
             led->registerEndpoints();
         }
     }
 
     void update() {
-        for (const std::unique_ptr<Led> &led : ledList) {
+        for (const std::unique_ptr<Light> &led : lightList) {
             led->update();
         }
     }
@@ -51,10 +51,10 @@ public:
             String result = "{\n"
             "  \"uptime\": \"" + String(millis() / 1000) + ",\n"
             "  \"lights\": [";
-            for (int i = 0; i < ledList.size(); ++i) {
+            for (int i = 0; i < lightList.size(); ++i) {
                 String ledSer;
-                ledList[i]->serialize(ledSer);                
-                result += "  " + (i + 1 == ledList.size() ? ledSer + "\n" : ledSer + ",\n");
+                lightList[i]->serialize(ledSer);                
+                result += "  " + (i + 1 == lightList.size() ? ledSer + "\n" : ledSer + ",\n");
             }
             result += "  ]\n}";
 

@@ -32,44 +32,7 @@ ESP8266WebServer server(80);
 
 int lastUpdate = 0;
 
-/*
 const int ledCount = 1;
-std::vector<std::unique_ptr<Led>> ledList;
-
-template<typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args) {
-    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-}
-
-template<typename T, typename... Args>
-void addToVector(Args&&... args) {
-  std::unique_ptr<T> newObject = make_unique<T>(std::forward<Args>(args)...);
-  ledList.push_back(std::move(newObject));
-}*/
-
-//addToVector<WhiteLed>(0, POWER_OUT_1);
-
-const int ledCount = 1;
-
-/*
-std::vector<std::unique_ptr<Led>> ledList;
-ledList.emplace_back(std::unique_ptr<Led>(new WhiteLed(0, POWER_OUT_1)));
-*/
-
-/*
-std::unique_ptr<Led> ledList[1] = {
-    std::unique_ptr<WhiteLed>(new WhiteLed(server, 0, POWER_OUT_1))};
-*/
-
-//ledVector.emplace_back(new WhiteLed(0, POWER_OUT_1));
-//make_unique<WhiteLed, int>(0, POWER_OUT_1);
-//ledVector.push_back();
-
-/*
-Led **ledList = {
-  dynamic_cast<Led>(WhiteLed(0, POWER_OUT_1))
-};
-*/
 
 XBie xbie(server);
 
@@ -116,16 +79,18 @@ void setup()
     });
     ArduinoOTA.onError([](ota_error_t error) {
         Serial.printf("Error[%u]: ", error);
-        if (error == OTA_AUTH_ERROR)
-            Serial.println("Auth Failed");
-        else if (error == OTA_BEGIN_ERROR)
-            Serial.println("Begin Failed");
-        else if (error == OTA_CONNECT_ERROR)
-            Serial.println("Connect Failed");
-        else if (error == OTA_RECEIVE_ERROR)
-            Serial.println("Receive Failed");
-        else if (error == OTA_END_ERROR)
-            Serial.println("End Failed");
+        switch (error) {
+            case OTA_AUTH_ERROR:
+            Serial.println("Auth Failed"); break;
+            case OTA_BEGIN_ERROR:
+            Serial.println("Begin Failed"); break;
+            case OTA_CONNECT_ERROR:
+            Serial.println("Connect Failed"); break;
+            case OTA_RECEIVE_ERROR:
+            Serial.println("Receive Failed"); break;
+            case OTA_END_ERROR:
+            Serial.println("End Failed"); break;
+        }
     });
     ArduinoOTA.begin();
 

@@ -10,7 +10,6 @@ class RGBLed : public Led
 {
 private:
     int pinList[3];
-    bool on = false;
     int state[3] = {255};
     int target[3] = {255};
 
@@ -79,7 +78,7 @@ public:
     void serialize(String &result) override {
         result = "{\n"
         "  \"id\": \"" + String(this->id) + "\",\n"
-        "  \"ledType\": \"w\",\n"
+        "  \"lightType\": \"w\",\n"
         "  \"pwm\": " + (this->pwm ? "true" : "false") + ",\n"
         "  \"on\": " + (this->on ? "true" : "false") + ", \n"
         "  \"state_r\": " + String(this->state[0]) + ",\n"

@@ -8,7 +8,6 @@ class WhiteLed : public Led
 {
 private:
     int pin;
-    bool on = false;
     int state = 255;
     int target = 255;
 
@@ -23,23 +22,23 @@ public:
 
     void last()
     {
-        this->on = true;
+        on = true;
     }
 
     void full()
     {
-        this->on = true;
+        on = true;
         setTarget(255);
     }
 
     void off()
     {
-        this->on = false;
+        on = false;
     }
 
     void toggle()
     {
-        if (this->on)
+        if (on)
             off();
         else
             last();
@@ -47,7 +46,7 @@ public:
 
     void update() override
     {
-        if (!this->on)
+        if (!on)
         {
             int change = 0 - this->state;
             this->state += DIMMINGSPEED * ((change > 0) ? 1 : -1);
@@ -65,7 +64,7 @@ public:
 
             analogWrite(this->pin, this->state * PWMMULTIPLIER);
         }
-        else if (this->on && this->target != this->state)
+        else if (on && this->target != this->state)
         {
             int change = this->target - this->state;
             this->state += DIMMINGSPEED * ((change > 0) ? 1 : -1);
@@ -88,9 +87,9 @@ public:
     void serialize(String &result) override {
         result = "{\n"
         "  \"id\": \"" + String(this->id) + "\",\n"
-        "  \"ledType\": \"w\",\n"
+        "  \"lightType\": \"w\",\n"
         "  \"pwm\": " + (this->pwm ? "true" : "false") + ",\n"
-        "  \"on\": " + (this->on ? "true" : "false") + ", \n"
+        "  \"on\": " + (on ? "true" : "false") + ", \n"
         "  \"target\": " + String(this->target) + "\n"
         "}";
     }
