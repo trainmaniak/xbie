@@ -6,14 +6,21 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <Adafruit_NeoPixel.h>
 
+// common includes
 #include "xbie.hpp"
 #include "definitions.hpp"
 #include "tools.hpp"
+
+// includes for LED subdevice
+#include <Adafruit_NeoPixel.h>
+
 #include "led.hpp"
 #include "whiteLed.hpp"
 #include "rgbLed.hpp"
+
+// includes for IR subdevice
+#include "ir.hpp"
 
 #ifdef __AVR__
 #include <avr/power.h> // Required for 16 MHz Adafruit Trinket
@@ -23,13 +30,20 @@
 const char *ssid = "";
 const char *password = "";
 
+MDNSResponder mdns;
+
 // I/O pins
 #define BLINK_LED 14 // On board led. Second instaled LED beside LED_BUILTIN.
-#define POWER_OUT_W D3
-#define POWER_OUT_RGB_R D4
-#define POWER_OUT_RGB_G D5
-#define POWER_OUT_RGB_B D6
-#define POWER_OUT_S D7
+#define PIN_LED_W D3
+
+// for testing purpose only
+#define PIN_LED_RGB_R D8
+#define PIN_LED_RGB_G D5
+#define PIN_LED_RGB_B D6
+#define PIN_LED_S D7
+
+#define PIN_IR_SEND D2
+#define PIN_IR_RECV D4
 
 // Web server
 ESP8266WebServer server(80);
@@ -46,17 +60,19 @@ void setup()
     // IO INIT
     pinMode(BLINK_LED, OUTPUT);
 
-    pinMode(POWER_OUT_W, OUTPUT);
-    digitalWrite(POWER_OUT_W, LOW);
+    pinMode(PIN_LED_W, OUTPUT);
+    digitalWrite(PIN_LED_W, LOW);
 
-    pinMode(POWER_OUT_RGB_R, OUTPUT);
-    digitalWrite(POWER_OUT_RGB_R, LOW);
+    pinMode(PIN_LED_RGB_R, OUTPUT);
+    digitalWrite(PIN_LED_RGB_R, LOW);
 
-    pinMode(POWER_OUT_RGB_G, OUTPUT);
-    digitalWrite(POWER_OUT_RGB_G, LOW);
+    pinMode(PIN_LED_RGB_G, OUTPUT);
+    digitalWrite(PIN_LED_RGB_G, LOW);
 
-    pinMode(POWER_OUT_RGB_B, OUTPUT);
-    digitalWrite(POWER_OUT_RGB_B, LOW);
+    pinMode(PIN_LED_RGB_B, OUTPUT);
+    digitalWrite(PIN_LED_RGB_B, LOW);
+
+    
 
 // NEOPIXELS
 #if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
@@ -112,11 +128,12 @@ void setup()
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
 
-    xbie.addWLed(POWER_OUT_W);
-    int rgbPins[3] = {POWER_OUT_RGB_R, POWER_OUT_RGB_G, POWER_OUT_RGB_B};
+    xbie.addWLed(PIN_LED_W);
+    int rgbPins[3] = {PIN_LED_RGB_R, PIN_LED_RGB_G, PIN_LED_RGB_B};
     xbie.addRGBLed(rgbPins);
-    //xbie.addRGBStrip(POWER_OUT_S, 150);
-    xbie.setEndpoints();
+    //xbie.addRGBStrip(PIN_LED_S, 150);
+    xbie.addIR(PIN_IR_SEND, PIN_IR_RECV);
+    xbie.setAllEndpoints();
 
     lastUpdate = millis();
 

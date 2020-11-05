@@ -44,6 +44,13 @@ public:
             last();
     }
 
+    void sendStatus() {
+        server_.sendHeader("Access-Control-Allow-Origin", "*");
+        String result;
+        serialize(result);
+        server_.send(200, "text/json", result);
+    }
+
     void update() override
     {
         bool updateRequired = false;
@@ -90,26 +97,22 @@ public:
     {
         server_.on("/light/" + String(id_) + "/last", [this]() {
             last();
-            server_.sendHeader("Access-Control-Allow-Origin", "*");
-            server_.send(200, "text/plain", "ok");
+            this->sendStatus();
         });
 
         server_.on("/light/" + String(id_) + "/full", [this]() {
             full();
-            server_.sendHeader("Access-Control-Allow-Origin", "*");
-            server_.send(200, "text/plain", "ok");
+            this->sendStatus();
         });
 
         server_.on("/light/" + String(id_) + "/off", [this]() {
             off();
-            server_.sendHeader("Access-Control-Allow-Origin", "*");
-            server_.send(201, "text/plain", "ok");
+            this->sendStatus();
         });
 
         server_.on("/light/" + String(id_) + "/toggle", [this]() {
             toggle();
-            server_.sendHeader("Access-Control-Allow-Origin", "*");
-            server_.send(200, "text/plain", "ok");
+            this->sendStatus();
         });
 
         server_.on("/light/" + String(id_) + "/set/w", [this]() {
@@ -127,15 +130,11 @@ public:
             };
 
             setTarget(volume);
-            server_.sendHeader("Access-Control-Allow-Origin", "*");
-            server_.send(200, "text/plain", "ok");
+            this->sendStatus();
         });
 
         server_.on("/light/" + String(id_) + "/status", [this]() {
-            server_.sendHeader("Access-Control-Allow-Origin", "*");
-            String result;
-            serialize(result);
-            server_.send(200, "text/json", result);
+            this->sendStatus();
         });
     };
 };

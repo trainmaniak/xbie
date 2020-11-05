@@ -8,44 +8,14 @@
 #include "rgbStrip.hpp"
 #include "definitions.hpp"
 
+#include "ir.hpp"
+
 class XBie
 {
 private:
     ESP8266WebServer &server;
     std::vector<std::unique_ptr<Light>> lightList;
-
-public:
-    XBie(ESP8266WebServer &server)
-        : server(server)
-    {
-        
-    }
-
-    void addWLed(const int pin) {
-        lightList.emplace_back(new WhiteLed(server, lightList.size(), pin));
-    }
-
-    void addRGBLed(const int *pinList) {
-        lightList.emplace_back(new RGBLed(server, lightList.size(), pinList));
-    }
-
-    void addRGBStrip(const int pin, const int pixelCount) {
-        lightList.emplace_back(new RGBStrip(server, lightList.size(), pin, pixelCount));
-    }
-
-    void setEndpoints() {
-        this->registerEndpoints();
-
-        for (const std::unique_ptr<Light> &led : lightList) {
-            led->registerEndpoints();
-        }
-    }
-
-    void update() {
-        for (const std::unique_ptr<Light> &led : lightList) {
-            led->update();
-        }
-    }
+    std::unique_ptr<Ir> ir_;
 
     void registerEndpoints()
     {
@@ -64,5 +34,44 @@ public:
 
             server.send(200, "text/json", result);
         });
+    }
+
+public:
+    XBie(ESP8266WebServer &server)
+        : server(server) {}
+
+    void addWLed(const int pin) {
+        lightList.emplace_back(new WhiteLed(server, lightList.size(), pin));
+    }
+
+    void addRGBLed(const int *pinList) {
+        lightList.emplace_back(new RGBLed(server, lightList.size(), pinList));
+    }
+
+    void addRGBStrip(const int pin, const int pixelCount) {
+        lightList.emplace_back(new RGBStrip(server, lightList.size(), pin, pixelCount));
+    }
+
+    void addIR(const int pinSend, const int pinRecv) {
+        std::unique_ptr<Ir> tmpIr(new Ir(server, pinSend, pinRecv));
+        ir_ = std::move(tmpIr);
+    }
+
+    void setAllEndpoints() {
+        this->registerEndpoints();
+
+        for (const std::unique_ptr<Light> &led : lightList) {
+            led->registerEndpoints();
+        }
+
+        ir_->registerEndpoints();
+    }
+
+    void update() {
+        for (const std::unique_ptr<Light> &led : lightList) {
+            led->update();
+        }
+
+        ir_->update();
     }
 };
