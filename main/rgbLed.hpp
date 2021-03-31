@@ -25,29 +25,19 @@ public:
         memcpy(target_, value, sizeof(target_));
     }
 
-    void last()
-    {
-        on_ = true;
+    int getBrightness() override {
+        return (target_[0] + target_[1] + target_[2]) / 3;
     }
 
-    void full()
+    void cycle() override {
+        // TODO
+    }
+
+    void full() override
     {
         on_ = true;
         int target_[3] = {255, 255, 255};
         setTarget(target_);
-    }
-
-    void off()
-    {
-        on_ = false;
-    }
-
-    void toggle()
-    {
-        if (on_)
-            off();
-        else
-            last();
     }
 
     void sendStatus() {

@@ -45,6 +45,8 @@ MDNSResponder mdns;
 #define PIN_IR_SEND D2
 #define PIN_IR_RECV D4
 
+#define PIN_BTN D1
+
 // Web server
 ESP8266WebServer server(80);
 
@@ -71,6 +73,8 @@ void setup()
 
     pinMode(PIN_LED_RGB_B, OUTPUT);
     digitalWrite(PIN_LED_RGB_B, LOW);
+
+    pinMode(PIN_BTN, INPUT);
 
     
 
@@ -133,6 +137,8 @@ void setup()
     xbie.addRGBLed(rgbPins);
     //xbie.addRGBStrip(PIN_LED_S, 150);
     xbie.addIR(PIN_IR_SEND, PIN_IR_RECV);
+    xbie.addButton(PIN_BTN, 0);
+    
     xbie.setAllEndpoints();
 
     lastUpdate = millis();
@@ -146,9 +152,10 @@ void loop()
     ArduinoOTA.handle();
     server.handleClient();
 
-    if (lastUpdate - millis() > 16)
-    {
-        xbie.update();
+    xbie.updateButtons();
+
+    if (lastUpdate - millis() > 16) {
+        xbie.updateLights();
         lastUpdate = millis();
     }
     delay(1);

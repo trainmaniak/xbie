@@ -6,6 +6,8 @@
 #include "whiteLed.hpp"
 #include "rgbLed.hpp"
 #include "rgbStrip.hpp"
+#include "button.hpp"
+
 #include "definitions.hpp"
 
 #include "ir.hpp"
@@ -15,6 +17,7 @@ class XBie
 private:
     ESP8266WebServer &server;
     std::vector<std::unique_ptr<Light>> lightList;
+    std::vector<std::unique_ptr<Button>> buttonList;
     std::unique_ptr<Ir> ir_;
 
     void registerEndpoints()
@@ -57,6 +60,11 @@ public:
         ir_ = std::move(tmpIr);
     }
 
+    void addButton(const int pin, const int lightId) {
+        buttonList.emplace_back(new Button(pin, lightId));
+    }
+
+
     void setAllEndpoints() {
         this->registerEndpoints();
 
@@ -67,11 +75,27 @@ public:
         ir_->registerEndpoints();
     }
 
-    void update() {
+    void updateLights() {
         for (const std::unique_ptr<Light> &led : lightList) {
             led->update();
         }
 
         ir_->update();
+    }
+
+    void updateButtons() {
+        for (const std::unique_ptr<Button> &btn : buttonList) {
+            int result = btn->check();
+
+            if (result == 1) {
+                Light *light = &*lightList[btn->getLightId()];
+
+                // TODO IF is it LED and cycleable
+                if (light->isLed()) {
+                    Led *led = static_cast<Led *>(light);
+                    led->cycle();
+                }
+            }
+        }
     }
 };

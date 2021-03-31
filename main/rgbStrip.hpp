@@ -34,11 +34,20 @@ public:
         strip = new Adafruit_NeoPixel(pixelCount_, pin_, NEO_GRB + NEO_KHZ800);
     }
 
+    bool isLed() override {
+        return false;
+    }
+
     void setSolidColor(const int targetList[])
     {
         memcpy(target_, targetList, sizeof(target_));
         animation_ = RGBStripAnimationEnum::solid;
         solidAnimationUpdated_ = false;
+    }
+
+    void toggle() override
+    {
+      
     }
 
     void update() override

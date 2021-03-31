@@ -20,28 +20,41 @@ public:
         target_ = volume;
     }
 
-    void last()
-    {
-        on_ = true;
+    int getBrightness() override {
+        return target_;
     }
 
-    void full()
+    void cycle() override {
+        int step = 85;// (int)((double)256 / (double)CYCLE_COUNT);
+
+        int level = getBrightness() / step;
+
+        // TODO pwm test
+
+        if (!on_) {
+            full();
+            return;
+        }
+
+        for (int i = CYCLE_COUNT; i > 0; --i) {
+            if (level >= i) {
+                int newTarget = step * (i - 1);
+
+                if (newTarget == 0) {
+                    off();
+                } else {
+                    setTarget(newTarget);
+                }
+
+                return;
+            }
+        }
+    }
+
+    void full() override
     {
         on_ = true;
         setTarget(255);
-    }
-
-    void off()
-    {
-        on_ = false;
-    }
-
-    void toggle()
-    {
-        if (on_)
-            off();
-        else
-            last();
     }
 
     void sendStatus() {
